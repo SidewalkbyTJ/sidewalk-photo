@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidewalk by TJ — West LA Street Photography</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Instrument+Sans:wght@400;600&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #0a0a0a;
+            --white: #fafafa;
+            --gray: #666666;
+            --accent: #ff3e00;
+        }
+
+        body {
+            font-family: 'Instrument Sans', -apple-system, sans-serif;
+            background: var(--white);
+            color: var(--black);
+            overflow-x: hidden;
+            line-height: 1.4;
+        }
+
+        /* Deconstructed Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .header-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            padding: 2rem;
+            pointer-events: all;
+        }
+
+        .logo {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.5rem;
+            letter-spacing: -0.03em;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            transform: rotate(180deg);
+            align-self: start;
+        }
+
+        .location {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            padding-top: 0.5rem;
+        }
+
+        .nav {
+            text-align: right;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Hero Section - Ultra Editorial */
+        .hero {
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            padding: 8rem 2rem 2rem;
+            gap: 2rem;
+            position: relative;
+        }
+
+        .hero-title {
+            grid-column: 1 / 3;
+            grid-row: 1;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: clamp(3rem, 12vw, 12rem);
+            line-height: 0.85;
+            letter-spacing: -0.05em;
+            align-self: end;
+            animation: slideIn 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .hero-subtitle {
+            grid-column: 3;
+            grid-row: 1;
+            align-self: end;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            max-width: 200px;
+            justify-self: end;
+            animation: fadeIn 1s 0.3s both;
+        }
+
+        .hero-image {
+            grid-column: 2 / 4;
+            grid-row: 2;
+            position: relative;
+            overflow: hidden;
+            animation: scaleIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.15) grayscale(1);
+        }
+
+        .hero-label {
+            grid-column: 1;
+            grid-row: 2;
+            align-self: start;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            writing-mode: vertical-rl;
+            animation: fadeIn 1s 0.5s both;
+        }
+
+        /* Gallery Grid - Deconstructed */
+        .gallery {
+            padding: 8rem 2rem 4rem;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+            position: relative;
+        }
+
+        .photo-item {
+            cursor: pointer;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+        }
+
+        .photo-item:hover {
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .photo-item:nth-child(1) { grid-column: 1 / 6; grid-row: 1 / 3; }
+        .photo-item:nth-child(2) { grid-column: 7 / 11; grid-row: 1 / 2; margin-top: 4rem; }
+        .photo-item:nth-child(3) { grid-column: 11 / 13; grid-row: 1 / 3; }
+        .photo-item:nth-child(4) { grid-column: 1 / 4; grid-row: 3 / 5; }
+        .photo-item:nth-child(5) { grid-column: 4 / 9; grid-row: 3 / 5; margin-top: -3rem; }
+        .photo-item:nth-child(6) { grid-column: 9 / 13; grid-row: 3 / 4; }
+        .photo-item:nth-child(7) { grid-column: 2 / 7; grid-row: 5 / 7; }
+        .photo-item:nth-child(8) { grid-column: 7 / 10; grid-row: 5 / 7; margin-top: 3rem; }
+        .photo-item:nth-child(9) { grid-column: 10 / 13; grid-row: 5 / 6; }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: contrast(1.1) grayscale(1);
+            transition: filter 0.3s;
+        }
+
+        .photo-item:hover img {
+            filter: contrast(1.2) grayscale(1);
+        }
+
+        .photo-number {
+            position: absolute;
+            top: -1.5rem;
+            right: 0;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 3rem;
+            color: var(--accent);
+            opacity: 0.4;
+            line-height: 1;
+        }
+
+        /* Modal - Bold Purchase Interface */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(10, 10, 10, 0.97);
+            z-index: 2000;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-image {
+            position: relative;
+            animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: auto;
+            filter: contrast(1.15) grayscale(1);
+        }
+
+        .modal-details {
+            color: var(--white);
+            animation: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 3rem;
+            cursor: pointer;
+            font-family: 'Archivo Black', sans-serif;
+            line-height: 1;
+            padding: 0;
+            transition: transform 0.3s, color 0.3s;
+        }
+
+        .modal-close:hover {
+            transform: rotate(90deg);
+            color: var(--accent);
+        }
+
+        .modal-title {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .modal-location {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--gray);
+            margin-bottom: 3rem;
+        }
+
+        .size-selector {
+            margin-bottom: 3rem;
+        }
+
+        .size-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .size-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .size-option {
+            padding: 1.25rem;
+            border: 2px solid var(--white);
+            background: none;
+            color: var(--white);
+            cursor: pointer;
+            font-family: 'Instrument Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+
+        .size-option:hover {
+            background: var(--white);
+            color: var(--black);
+        }
+
+        .size-option.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--white);
+        }
+
+        .size-price {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        .purchase-btn {
+            width: 100%;
+            padding: 1.5rem;
+            background: var(--white);
+            color: var(--black);
+            border: none;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .purchase-btn:hover {
+            background: var(--accent);
+            color: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .purchase-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Footer */
+        footer {
+            padding: 6rem 2rem 3rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            border-top: 1px solid var(--black);
+            margin-top: 8rem;
+        }
+
+        .footer-col h3 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .footer-col p {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--gray);
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto;
+                padding: 6rem 1.5rem 2rem;
+            }
+
+            .hero-title {
+                grid-column: 1;
+                grid-row: 1;
+                font-size: clamp(2.5rem, 15vw, 6rem);
+            }
+
+            .hero-subtitle {
+                grid-column: 1;
+                grid-row: 2;
+                justify-self: start;
+                margin-bottom: 2rem;
+            }
+
+            .hero-image {
+                grid-column: 1;
+                grid-row: 3;
+                height: 50vh;
+            }
+
+            .hero-label {
+                grid-column: 1;
+                grid-row: 4;
+                writing-mode: horizontal-tb;
+                margin-top: 1rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .photo-item {
+                grid-column: 1 !important;
+                grid-row: auto !important;
+                margin-top: 0 !important;
+            }
+
+            .photo-number {
+                font-size: 2rem;
+            }
+
+            .modal.active {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            footer {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Deconstructed Header -->
+    <header>
+        <div class="header-grid">
+            <div class="logo">SIDEWALK</div>
+            <div class="location">West Los Angeles</div>
+            <nav class="nav">
+                <span style="opacity: 0.5;">Collection</span>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1 class="hero-title">SIDE<br>WALK</h1>
+        <div class="hero-subtitle">
+            Black and white street photography capturing the raw, unfiltered moments of West Los Angeles. Each frame tells a story of urban life.
+        </div>
+        <div class="hero-image">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 600'%3E%3Crect fill='%23333' width='800' height='600'/%3E%3Ctext x='50%25' y='50%25' fill='%23999' font-size='24' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EHERO IMAGE%3C/text%3E%3C/svg%3E" alt="Street Photography">
+        </div>
+        <div class="hero-label">Scroll to Explore</div>
+    </section>
+
+    <!-- Gallery -->
+    <section class="gallery">
+        <div class="gallery-grid">
+            <!-- Photo Items -->
+            <div class="photo-item" data-photo="1" data-title="Venice Boardwalk" data-location="Venice, CA" data-orientation="landscape" data-aspect="3:2">
+                <span class="photo-number">01</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%23222' width='600' height='400'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EVENICE BOARDWALK%3C/text%3E%3C/svg%3E" alt="Venice Boardwalk">
+            </div>
+
+            <div class="photo-item" data-photo="2" data-title="Santa Monica Pier" data-location="Santa Monica, CA" data-orientation="portrait" data-aspect="2:3">
+                <span class="photo-number">02</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%23282828' width='400' height='600'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3ESM PIER%3C/text%3E%3C/svg%3E" alt="Santa Monica Pier">
+            </div>
+
+            <div class="photo-item" data-photo="3" data-title="Abbot Kinney" data-location="Venice, CA" data-orientation="portrait" data-aspect="4:5">
+                <span class="photo-number">03</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 500'%3E%3Crect fill='%23262626' width='400' height='500'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EABBOT KINNEY%3C/text%3E%3C/svg%3E" alt="Abbot Kinney">
+            </div>
+
+            <div class="photo-item" data-photo="4" data-title="Ocean Park" data-location="Santa Monica, CA" data-orientation="square" data-aspect="1:1">
+                <span class="photo-number">04</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 500 500'%3E%3Crect fill='%23242424' width='500' height='500'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EOCEAN PARK%3C/text%3E%3C/svg%3E" alt="Ocean Park">
+            </div>
+
+            <div class="photo-item" data-photo="5" data-title="Main Street" data-location="Santa Monica, CA" data-orientation="landscape" data-aspect="16:9">
+                <span class="photo-number">05</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect fill='%23202020' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EMAIN STREET%3C/text%3E%3C/svg%3E" alt="Main Street">
+            </div>
+
+            <div class="photo-item" data-photo="6" data-title="Muscle Beach" data-location="Venice, CA" data-orientation="landscape" data-aspect="3:2">
+                <span class="photo-number">06</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%231e1e1e' width='600' height='400'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EMUSCLE BEACH%3C/text%3E%3C/svg%3E" alt="Muscle Beach">
+            </div>
+
+            <div class="photo-item" data-photo="7" data-title="Sunset Junction" data-location="West Hollywood, CA" data-orientation="landscape" data-aspect="3:2">
+                <span class="photo-number">07</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 400'%3E%3Crect fill='%231c1c1c' width='600' height='400'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3ESUNSET JUNCTION%3C/text%3E%3C/svg%3E" alt="Sunset Junction">
+            </div>
+
+            <div class="photo-item" data-photo="8" data-title="Rose Avenue" data-location="Venice, CA" data-orientation="portrait" data-aspect="2:3">
+                <span class="photo-number">08</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 600'%3E%3Crect fill='%231a1a1a' width='400' height='600'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EROSE AVENUE%3C/text%3E%3C/svg%3E" alt="Rose Avenue">
+            </div>
+
+            <div class="photo-item" data-photo="9" data-title="Pacific Coast" data-location="Malibu, CA" data-orientation="landscape" data-aspect="16:9">
+                <span class="photo-number">09</span>
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 450'%3E%3Crect fill='%23181818' width='800' height='450'/%3E%3Ctext x='50%25' y='50%25' fill='%23888' font-size='18' font-family='monospace' text-anchor='middle' dominant-baseline='middle'%3EPACIFIC COAST%3C/text%3E%3C/svg%3E" alt="Pacific Coast">
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-col">
+            <h3>Sidewalk by TJ</h3>
+            <p>Black and white street photography from the heart of West Los Angeles.</p>
+        </div>
+        <div class="footer-col">
+            <h3>Connect</h3>
+            <p>info@sidewalkbytj.com<br>Los Angeles, CA</p>
+        </div>
+        <div class="footer-col">
+            <h3>Prints</h3>
+            <p>All prints are museum-quality archival prints on premium fine art paper.</p>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div class="modal" id="photoModal">
+        <button class="modal-close" onclick="closeModal()">×</button>
+        <div class="modal-image">
+            <img id="modalImage" src="" alt="">
+        </div>
+        <div class="modal-details">
+            <h2 class="modal-title" id="modalTitle"></h2>
+            <p class="modal-location" id="modalLocation"></p>
+
+            <div class="size-selector">
+                <label class="size-label">Select Print Size</label>
+                <div class="size-options" id="sizeOptions"></div>
+            </div>
+
+            <button class="purchase-btn" onclick="initiatePurchase()">Purchase Print</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Stripe (Replace with your publishable key)
+        const stripe = Stripe('pk_test_YOUR_PUBLISHABLE_KEY_HERE');
+
+        // Photo data with pricing based on orientation
+        const photos = {
+            '1': {
+                title: 'Venice Boardwalk',
+                location: 'Venice, CA',
+                orientation: 'landscape',
+                aspect: '3:2',
+                sizes: [
+                    { name: '12" × 8"', price: 8500, priceId: 'price_landscape_small' },
+                    { name: '18" × 12"', price: 14500, priceId: 'price_landscape_medium' },
+                    { name: '24" × 16"', price: 22500, priceId: 'price_landscape_large' },
+                    { name: '36" × 24"', price: 35000, priceId: 'price_landscape_xlarge' }
+                ]
+            },
+            '2': {
+                title: 'Santa Monica Pier',
+                location: 'Santa Monica, CA',
+                orientation: 'portrait',
+                aspect: '2:3',
+                sizes: [
+                    { name: '8" × 12"', price: 8500, priceId: 'price_portrait_small' },
+                    { name: '12" × 18"', price: 14500, priceId: 'price_portrait_medium' },
+                    { name: '16" × 24"', price: 22500, priceId: 'price_portrait_large' },
+                    { name: '24" × 36"', price: 35000, priceId: 'price_portrait_xlarge' }
+                ]
+            },
+            '3': {
+                title: 'Abbot Kinney',
+                location: 'Venice, CA',
+                orientation: 'portrait',
+                aspect: '4:5',
+                sizes: [
+                    { name: '8" × 10"', price: 7500, priceId: 'price_portrait_45_small' },
+                    { name: '16" × 20"', price: 16500, priceId: 'price_portrait_45_medium' },
+                    { name: '24" × 30"', price: 28500, priceId: 'price_portrait_45_large' }
+                ]
+            },
+            '4': {
+                title: 'Ocean Park',
+                location: 'Santa Monica, CA',
+                orientation: 'square',
+                aspect: '1:1',
+                sizes: [
+                    { name: '10" × 10"', price: 8500, priceId: 'price_square_small' },
+                    { name: '16" × 16"', price: 15500, priceId: 'price_square_medium' },
+                    { name: '24" × 24"', price: 25500, priceId: 'price_square_large' },
+                    { name: '36" × 36"', price: 39500, priceId: 'price_square_xlarge' }
+                ]
+            },
+            '5': {
+                title: 'Main Street',
+                location: 'Santa Monica, CA',
+                orientation: 'landscape',
+                aspect: '16:9',
+                sizes: [
+                    { name: '16" × 9"', price: 9500, priceId: 'price_landscape_169_small' },
+                    { name: '24" × 13.5"', price: 16500, priceId: 'price_landscape_169_medium' },
+                    { name: '32" × 18"', price: 24500, priceId: 'price_landscape_169_large' }
+                ]
+            },
+            '6': { title: 'Muscle Beach', location: 'Venice, CA', orientation: 'landscape', aspect: '3:2', sizes: [{ name: '12" × 8"', price: 8500, priceId: 'price_landscape_small' }, { name: '18" × 12"', price: 14500, priceId: 'price_landscape_medium' }, { name: '24" × 16"', price: 22500, priceId: 'price_landscape_large' }, { name: '36" × 24"', price: 35000, priceId: 'price_landscape_xlarge' }] },
+            '7': { title: 'Sunset Junction', location: 'West Hollywood, CA', orientation: 'landscape', aspect: '3:2', sizes: [{ name: '12" × 8"', price: 8500, priceId: 'price_landscape_small' }, { name: '18" × 12"', price: 14500, priceId: 'price_landscape_medium' }, { name: '24" × 16"', price: 22500, priceId: 'price_landscape_large' }, { name: '36" × 24"', price: 35000, priceId: 'price_landscape_xlarge' }] },
+            '8': { title: 'Rose Avenue', location: 'Venice, CA', orientation: 'portrait', aspect: '2:3', sizes: [{ name: '8" × 12"', price: 8500, priceId: 'price_portrait_small' }, { name: '12" × 18"', price: 14500, priceId: 'price_portrait_medium' }, { name: '16" × 24"', price: 22500, priceId: 'price_portrait_large' }, { name: '24" × 36"', price: 35000, priceId: 'price_portrait_xlarge' }] },
+            '9': { title: 'Pacific Coast', location: 'Malibu, CA', orientation: 'landscape', aspect: '16:9', sizes: [{ name: '16" × 9"', price: 9500, priceId: 'price_landscape_169_small' }, { name: '24" × 13.5"', price: 16500, priceId: 'price_landscape_169_medium' }, { name: '32" × 18"', price: 24500, priceId: 'price_landscape_169_large' }] }
+        };
+
+        let currentPhoto = null;
+        let selectedSize = null;
+
+        // Open modal when photo is clicked
+        document.querySelectorAll('.photo-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const photoId = this.dataset.photo;
+                openModal(photoId, this.querySelector('img').src);
+            });
+        });
+
+        function openModal(photoId, imageSrc) {
+            currentPhoto = photos[photoId];
+            selectedSize = null;
+
+            const modal = document.getElementById('photoModal');
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('modalTitle').textContent = currentPhoto.title;
+            document.getElementById('modalLocation').textContent = currentPhoto.location;
+
+            // Generate size options
+            const sizeOptions = document.getElementById('sizeOptions');
+            sizeOptions.innerHTML = '';
+
+            currentPhoto.sizes.forEach((size, index) => {
+                const button = document.createElement('button');
+                button.className = 'size-option';
+                button.innerHTML = `
+                    <span>${size.name}</span>
+                    <span class="size-price">$${(size.price / 100).toFixed(2)}</span>
+                `;
+                button.onclick = () => selectSize(index);
+                sizeOptions.appendChild(button);
+            });
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('photoModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function selectSize(index) {
+            selectedSize = currentPhoto.sizes[index];
+            
+            // Update UI
+            document.querySelectorAll('.size-option').forEach((btn, i) => {
+                btn.classList.toggle('selected', i === index);
+            });
+        }
+
+        async function initiatePurchase() {
+            if (!selectedSize) {
+                alert('Please select a print size');
+                return;
+            }
+
+            // Create a checkout session on your backend
+            // This is a placeholder - you'll need to implement your backend
+            try {
+                const response = await fetch('/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        photoTitle: currentPhoto.title,
+                        photoLocation: currentPhoto.location,
+                        size: selectedSize.name,
+                        priceId: selectedSize.priceId,
+                        amount: selectedSize.price
+                    })
+                });
+
+                const session = await response.json();
+
+                // Redirect to Stripe Checkout
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        // Close modal on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Smooth scroll reveal for gallery items
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '0';
+                    entry.target.style.transform = 'translateY(30px)';
+                    setTimeout(() => {
+                        entry.target.style.transition = 'opacity 0.8s, transform 0.8s';
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, 100);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.photo-item').forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html>
