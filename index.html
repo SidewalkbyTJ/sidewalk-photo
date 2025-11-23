@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sidewalk by TJ — West LA Street Photography</title>
+    <meta name="description" content="Black and white street photography capturing the raw, unfiltered moments of West Los Angeles. Premium prints available.">
+    <meta name="keywords" content="street photography, black and white, Los Angeles, Venice, Santa Monica, fine art prints">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://sidewalkbytj.netlify.app/">
+    <meta property="og:title" content="Sidewalk by TJ — West LA Street Photography">
+    <meta property="og:description" content="Black and white street photography capturing the raw, unfiltered moments of West Los Angeles.">
+    <meta property="og:image" content="https://sidewalkbytj.netlify.app/og-image.jpg">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://sidewalkbytj.netlify.app/">
+    <meta property="twitter:title" content="Sidewalk by TJ — West LA Street Photography">
+    <meta property="twitter:description" content="Black and white street photography capturing the raw, unfiltered moments of West Los Angeles.">
+    <meta property="twitter:image" content="https://sidewalkbytj.netlify.app/og-image.jpg">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Instrument+Sans:wght@400;600&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
+    <script src="https://js.stripe.com/v3/"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_MEASUREMENT_ID'); // Replace with your GA4 ID
+    </script>
+</head>
+<body>
+    <!-- Copy all content from sidewalk-by-tj.html but update the script section -->
+    <script>
+        // Initialize Stripe with environment variable
+        const stripe = Stripe('pk_live_YOUR_LIVE_PUBLISHABLE_KEY_HERE'); // Update for production
+        
+        // Rest of the JavaScript code remains the same except for the API call
+        
+        async function initiatePurchase() {
+            if (!selectedSize) {
+                alert('Please select a print size');
+                return;
+            }
+
+            try {
+                // Updated API endpoint for Netlify Functions
+                const response = await fetch('/.netlify/functions/create-checkout-session', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        photoTitle: currentPhoto.title,
+                        photoLocation: currentPhoto.location,
+                        size: selectedSize.name,
+                        priceId: selectedSize.priceId,
+                        amount: selectedSize.price
+                    })
+                });
+
+                const session = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(session.error || 'Failed to create checkout session');
+                }
+
+                // Redirect to Stripe Checkout
+                const result = await stripe.redirectToCheckout({
+                    sessionId: session.id
+                });
+
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+        
+        // Include all other JavaScript from the original file...
+    </script>
+</body>
+</html>
