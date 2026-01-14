@@ -635,8 +635,23 @@
     </div>
 
     <script>
-        // Initialize Stripe (Use environment variable in production)
-        const stripe = Stripe('pk_live_YOUR_LIVE_PUBLISHABLE_KEY_HERE'); // Replace with your live key
+        // Initialize Stripe - will be set after fetching key
+        let stripe = null;
+
+        // Fetch Stripe publishable key from Netlify Function
+        async function initializeStripe() {
+            try {
+                const response = await fetch('/.netlify/functions/get-stripe-key');
+                const data = await response.json();
+                stripe = Stripe(data.publishableKey);
+            } catch (error) {
+                console.error('Failed to initialize Stripe:', error);
+                alert('Payment system is currently unavailable. Please try again later.');
+            }
+        }
+
+        // Initialize Stripe on page load
+        initializeStripe();
 
         // Photo data with pricing based on orientation
         const photos = {
@@ -781,6 +796,11 @@
         async function initiatePurchase() {
             if (!selectedSize) {
                 alert('Please select a print size');
+                return;
+            }
+
+            if (!stripe) {
+                alert('Payment system is still loading. Please try again in a moment.');
                 return;
             }
 
