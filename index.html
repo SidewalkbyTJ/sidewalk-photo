@@ -170,6 +170,11 @@
             height: 100%;
             object-fit: cover;
             filter: contrast(1.15) grayscale(1);
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: none;
         }
 
         .hero-label {
@@ -224,6 +229,15 @@
             display: block;
             filter: contrast(1.1) grayscale(1);
             transition: filter 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: none;
+        }
+
+        .photo-item {
+            pointer-events: auto;
         }
 
         .photo-item:hover img {
@@ -272,6 +286,11 @@
             width: 100%;
             height: auto;
             filter: contrast(1.15) grayscale(1);
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            pointer-events: none;
         }
 
         .modal-details {
@@ -861,6 +880,35 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeModal();
+            }
+        });
+
+        // Disable right-click on images
+        document.addEventListener('contextmenu', (e) => {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Disable drag-and-drop on images
+        document.addEventListener('dragstart', (e) => {
+            if (e.target.tagName === 'IMG') {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // Disable common keyboard shortcuts for saving images
+        document.addEventListener('keydown', (e) => {
+            // Disable Ctrl+S / Cmd+S
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                if (document.activeElement.tagName === 'IMG' ||
+                    e.target.closest('.photo-item') ||
+                    e.target.closest('.modal-image')) {
+                    e.preventDefault();
+                    return false;
+                }
             }
         });
 
